@@ -61,21 +61,20 @@ Get a customer data
 
 Create a new customer
 
-    >>> data = {
-            'code': 'EXAMPLE_CUSTOMER',
-            'firstName': 'Example',
-            'lastName': 'Customer',
-            'email': 'example_customer@example.com'
-            'subscription': {
+    >>> customer = cheddar.new_customer(
+            code='EXAMPLE_CUSTOMER',
+            firstName='Example',
+            lastName='Customer',
+            email='example_customer@example.com'
+            subscription={
                 'planCode': 'THE_PLAN_CODE',
                 'ccFirstName': 'Example',
                 'ccLastName': 'Customer',
                 'ccNumber': '4111111111111111',
                 'ccExpiration': '04/2011',
                 'ccZip': '90210',
-            }
-        }
-    >>> customer = cheddar.new_customer(**data)
+            },
+        )
 
 
 How does it work?
