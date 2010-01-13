@@ -88,61 +88,61 @@ class Connection:
         
     def get_plans(self, **kwargs):
         """Get all pricing plans in the product"""
-        return self._process(key="plans", val="get", require_id=False)
+        return self._process(key="plans", val="get", values=kwargs, require_id=False)
     
     def get_plan(self, **kwargs):
         """Get a single pricing plan"""
-        return self._process(key="plans", val="get", pass_values=False)
+        return self._process(key="plans", val="get", values=kwargs, pass_values=False)
     
     def delete_plan(self, **kwargs):
         """Delete a plan"""
-        return self._process(key="plans", val="delete", pass_values=False)
+        return self._process(key="plans", val="delete", values=kwargs, pass_values=False)
     
     def get_customers(self, **kwargs):
         """Get all customers in the product"""
-        return self._process(key="customers", val="get", require_id=False)
+        return self._process(key="customers", val="get", values=kwargs, require_id=False)
     
     def get_customer(self, **kwargs):
         """Get all plans in the product"""
-        return self._process(key="customers", val="get", pass_values=False)
+        return self._process(key="customers", val="get", values=kwargs, pass_values=False)
     
     def get_all_customers(self, **kwargs):
         """Get all plans in the product"""
-        return self._process(key="customers", val="get-all", require_id=False, pass_product_code=False)
+        return self._process(key="customers", val="get-all", values=kwargs, require_id=False, pass_product_code=False)
     
     def new_customer(self, **kwargs):
         """Create new customer"""
-        return self._process(key="customers", val="new", require_id=False)
+        return self._process(key="customers", val="new", values=kwargs, require_id=False)
     
     def edit_customer(self, **kwargs):
         """Change customer information"""
-        return self._process(key="customers", val="edit")
+        return self._process(key="customers", val="edit", values=kwargs)
     
     def delete_customer(self, **kwargs):
         """Delete a customer"""
-        return self._process(key="customers", val="delete", pass_values=False)
+        return self._process(key="customers", val="delete", values=kwargs, pass_values=False)
     
     def edit_subscription(self, **kwargs):
         """Change subscription information"""
-        return self._process(key="customers", val="edit-subscription")
+        return self._process(key="customers", val="edit-subscription", values=kwargs)
     
     def cancel_subscription(self, **kwargs):
         """Cancel subscription"""
-        return self._process(key="customers", val="cancel", pass_values=False)
+        return self._process(key="customers", val="cancel", values=kwargs, pass_values=False)
     
     def add_item_quantity(self, **kwargs):
         """Increment a usage item quantity"""
-        return self._process(key="customers", val="add-item-quantity")
+        return self._process(key="customers", val="add-item-quantity", values=kwargs)
     
     def remove_item_quantity(self, **kwargs):
         """Decrement a usage item quantity"""
-        return self._process(key="customers", val="remove-item-quantity")
+        return self._process(key="customers", val="remove-item-quantity", values=kwargs)
     
     def set_item_quantity(self, **kwargs):
         """Set a usage item quantity"""
-        return self._process(key="customers", val="set-item-quantity")
+        return self._process(key="customers", val="set-item-quantity", values=kwargs)
     
     def add_charge(self, **kwargs):
         """Add a custom charge (debit) or credit to the current invoice
         A positive 'eachAmount' will result in a debit. If negative, a credit."""
-        return self._process(key="customers", val="add-charge")
+        return self._process(key="customers", val="add-charge", values=kwargs)
