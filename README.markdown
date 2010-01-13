@@ -57,7 +57,7 @@ Connect to CheddarGetter
 Get a customer data
 
     >>> customer_list = cheddar.get_customers();
-    >>> one_specific_customer = chedddar.get_customer('EXAMPLE_CUSTOMER')
+    >>> one_specific_customer = chedddar.get_customer(code='EXAMPLE_CUSTOMER')
 
 Create a new customer
 
@@ -75,7 +75,7 @@ Create a new customer
                 'ccZip': '90210',
             }
         }
-    >>> customer = cheddar.new_customer(data)
+    >>> customer = cheddar.new_customer(**data)
 
 
 How does it work?
