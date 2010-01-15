@@ -9,8 +9,6 @@ from urllib import urlencode
 
 VERSION = '1.0alpha'
 
-httplib2.debuglevel = 4
-
 class CheddarGetter:
     """Class designed to handle all interaction with the CheddarGetter API."""
     
