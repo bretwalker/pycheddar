@@ -36,7 +36,8 @@ class CheddarGetter:
         but it's available to send arbitrary requests if needed.
         
         The product code will be appended to the end of the request automatically,
-        and does not need to be included"""
+        and does not need to be included. Override this behavior by passing
+        pass_product_code = False."""
 
         # build the base request URL
         url = '%s/xml/%s' % (cls._server, path.strip('/'))
@@ -111,14 +112,6 @@ class CheddarGetter:
         return content
         
             
-    def edit_subscription(cls, **kwargs):
-        """Change subscription information"""
-        return self._process(key="customers", val="edit-subscription", values=kwargs)
-    
-    def cancel_subscription(cls, **kwargs):
-        """Cancel subscription"""
-        return self._process(key="customers", val="cancel", values=kwargs, pass_values=False)
-    
     def add_item_quantity(cls, **kwargs):
         """Increment a usage item quantity"""
         return self._process(key="customers", val="add-item-quantity", values=kwargs)
@@ -172,6 +165,11 @@ class CheddarObject(object):
                 raise AttributeError, 'Once an item has been saved to CheddarGetter, the code is immutable.'
         elif key == 'id':
             raise AttributeError, 'The CheddarGetter ID is immutable.'
+        elif isinstance(value, CheddarObject):
+            # if the value is a CheddarObject, then it doesn't belong
+            # as part of the data dictionary, but rather as a regular
+            # instance attribute
+            self.__dict__[key] = value
         else:
             # in normal situations, write this item to the
             # self._data dictionary (using underscores, always)
@@ -185,14 +183,13 @@ class CheddarObject(object):
         # method
         if hasattr(self._data, key):
             return getattr(self._data, key)
-
+        
         # handle the id and code in a special way
         if key == 'id' or key == 'code':
             return self.__dict__['_' + key]
 
-        # if this is a special private key, return directly
-        # from the object
-        if key[0] == '_':
+        # is this in the regular attribute dictionary?
+        if key[0] == '_' or key in self.__dict__:
             return self.__dict__[key]
             
         # retrieve from the self._data dictionary
@@ -244,16 +241,27 @@ class CheddarObject(object):
         
         
     @classmethod
-    def from_xml(cls, xml, clean = True):
+    def from_xml(cls, xml, *args, **kwargs):
         """Create a new object and load information for it from
         XML sent from CheddarGetter.
         
+        If there are additional positional arguments, they are
+        passed on to the object's constructor.
+        
         Data loaded through this method is assumed to be clean.
         If it is dirty data (in other words, data that does not
-        match what is currently saved in CheddarGetter), set
+        match what is currently saved in CheddarGetter), set kwarg
         clean = False."""
         
-        new = cls()
+        # default "clean" to True
+        clean = kwargs.pop('clean', True)
+        
+        # I don't recognize any other kwargs
+        if len(kwargs) > 0:
+            raise KeyError, 'Unrecognized keyword argument: %s' % kwargs.keys()[0]
+        
+        # create the new object and load in the data
+        new = cls(*args)
         new._load_data_from_xml(xml, clean)
         
         # done -- return the new object
@@ -381,7 +389,7 @@ class Customer(CheddarObject):
     
     def __init__(self, **kwargs):
         super(Customer, self).__init__(**kwargs)
-        self.subscription = Subscription()
+        self.subscription = Subscription(self)
         
         
     def _load_data_from_xml(self, xml, clean = True):
@@ -398,7 +406,7 @@ class Customer(CheddarObject):
         
         # process the subscriptions for this customer
         subscription_xml = xml.find('subscriptions').find('subscription')
-        self.subscription = Subscription.from_xml(subscription_xml)
+        self.subscription = Subscription.from_xml(subscription_xml, self)
         if clean is True:
             self._clean_data['subscription'] = self.subscription
         
@@ -468,7 +476,7 @@ class Customer(CheddarObject):
 
         return True
     
-        
+    
     def save(self):
         """Save this customer to CheddarGetter"""
         
@@ -516,13 +524,28 @@ class Customer(CheddarObject):
             pass
     
     
-    
 class Subscription(CheddarObject):
     """An object representing a CheddarGetter subscription."""
     
-    def __init__(self):
+    def __init__(self, customer):
         super(Subscription, self).__init__()
+        self.customer = customer
         self.plan = Plan()
+        
+    
+    @classmethod
+    def from_xml(cls, xml, customer, clean = True):
+        """Create a new object and load information for it from
+        XML sent from CheddarGetter.
+        
+        Data loaded through this method is assumed to be clean.
+        If it is dirty data (in other words, data that does not
+        match what is currently saved in CheddarGetter), set
+        clean = False."""
+        
+        new = cls(customer)
+        new._load_data_from_xml(xml, clean)
+        return new
         
         
     def _load_data_from_xml(self, xml, clean = True):
@@ -578,12 +601,59 @@ class Subscription(CheddarObject):
         
     def validate(self):
         return True
+        
+        
+    def save(self):
+        """Save this object's properties to CheddarGetter."""
+        
+        # CheddarGetter does not create subscriptions directly;
+        # if this is a new object, it needs to be saved through the Customer
+        if self.is_new() is True:
+            self.customer.save()
+            return self
+            
+        # this is an object being edited; update the subscription
+        # by itself at CheddarGetter
+        kwargs = self._build_kwargs()
+        xml = CheddarGetter.request('/customers/edit-subscription/', code = self.customer.code, **kwargs)
+
+        # either way, I should get a well-formed customer XML response
+        # that can now be loaded into this object
+        for subscription_xml in xml.iterchildren('subscription'):
+            self._load_data_from_xml(customer_xml)
+            break
+            
+        return self
+        
     
+    def delete(self):
+        """Remove this subscription from CheddarGetter."""
+        
+        # this is straightforward: just run the cancellation
+        xml = CheddarGetter.request('/customers/cancel/', code = self.customer.code, **kwargs)
+        
+        
+    def cancel(self):
+        """Alias to Subscription.delete() -- provided because CheddarGetter
+        uses the method name "cancel" for the URL.
+        
+        For consistency, Subscription.delete() is preferred."""
+        return self.delete()
+        
+        
 
 class Invoice(CheddarObject):
     """An object representing a CheddarGetter invoice."""
     
-    
+    def save(self):
+        """Invoices are read-only at this time."""
+        
+        return NotImplemented
+        
+    def delete(self):
+        """Invoices are read-only at this time."""
+        
+        return NotImplemented
     
     
 # if we are using Django, and if the appropriate settings
