@@ -733,7 +733,11 @@ class Item(CheddarObject):
     
     def save(self):
         """Save this item back to CheddarGetter."""
+        
+        # sanity check: validate first!
+        self.validate()
     
+        # okay, save to CheddarGetter
         xml = CheddarGetter.request('/customers/set-item-quantity/', item_code = self.code, code = self.customer.code)
         self._load_data_from_xml(xml)
         return self
