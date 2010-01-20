@@ -12,6 +12,12 @@ class UnexpectedResponse(Exception):
     
 class BadRequest(Exception):
     pass
+        
+class GatewayFailure(Exception):
+    pass
+    
+class GatewayConnectionError(Exception):
+    pass
     
 class ValidationError(Exception):
     pass
