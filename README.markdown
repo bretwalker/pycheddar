@@ -39,6 +39,11 @@ is hopefully just our first minor contribution to the open source community.
 Example Usage
 -------------
 
+Set up your CheddarGetter login info:
+
+    >>> from pycheddar import *
+    >>> CheddarGetter.settings('e-mail address', 'password', 'product code')
+
 Get all customers (returns a list of Customer objects):
 
     >>> customers = Customer.all()
