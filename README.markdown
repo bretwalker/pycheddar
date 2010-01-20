@@ -1,11 +1,3 @@
-Woah there - this bad boy is not quite ready for prime time yet
----------------------------------------------------------------
-This is mostly a port from the PHP and Ruby wrappers that already existed -
-but it is not finished yet. We're building it to handle payment processing
-for FeedMagnet.com, but we figure everyone else should be able to benefit
-from it as well. We hope to be finished in the next few weeks.
-
-
 A Python wrapper for CheddarGetter
 ----------------------------------
 PyCheddar is a Python wrapper for CheddarGetter - which is a great service
@@ -19,7 +11,7 @@ Just clone this repository anywhere in your PythonPath like this:
 
     $ git clone http://github.com/jasford/pycheddar.git
 
-Eventually - but definitely not yet - you will be able to use easy_install
+Eventually - but not just yet - you will be able to use easy_install
 like this:
 
     $ easy_install pycheddar
@@ -46,39 +38,87 @@ is hopefully just our first minor contribution to the open source community.
 
 Example Usage
 -------------
-This is how we hope everything will work once it is all finished. Note that most
-of this does not work at all right now.
 
-Connect to CheddarGetter
+Get all customers (returns a list of Customer objects):
 
-    >>> import pycheddar
-    >>> cheddar = pyhcheddar.Connection(yourusername, yourpassword, yourproductcode)
+    >>> customers = Customer.all()
+    >>> for customer in Customer.all():
+    ...     print customer.last_name
 
-Get a customer data
+Get a customer that already exists, either by the ID or the code in CheddarGetter:
 
-    >>> customer_list = cheddar.get_customers();
-    >>> one_specific_customer = chedddar.get_customer(code='EXAMPLE_CUSTOMER')
+    >>> customer = Customer.get('4072cc12-5375-102d-86dc-40402145ee8b')
+    >>> customer = Customer.get('MY_CODE')
+    
+Get customers based on arbitrary criteria:
 
-Create a new customer
+    >>> customers = Customer.search(last_name = 'Smith')
+    
+Edit information about a customer:
 
-    >>> customer = cheddar.new_customer(
-            code='EXAMPLE_CUSTOMER',
-            firstName='Example',
-            lastName='Customer',
-            email='example_customer@example.com'
-            subscription={
-                'planCode': 'THE_PLAN_CODE',
-                'ccFirstName': 'Example',
-                'ccLastName': 'Customer',
-                'ccNumber': '4111111111111111',
-                'ccExpiration': '04/2011',
-                'ccZip': '90210',
-            },
-        )
+    >>> customer = Customer.get('4072cc12-5375-102d-86dc-40402145ee8b')
+    >>> customer.last_name = 'Jones'
+    >>> customer.save()
+    
+Add a new customer:
 
+    >>> # this works...
+    >>> customer = Customer(code = 'JOHN_SMITH', first_name = 'John', last_name = 'Smith', email = 'john.smith@gmail.com', plan_code = 'FREE')
+    >>> customer.save()
+    >>>
+    >>> # and this does too...
+    >>> customer = Customer()
+    >>> customer.code = 'JOHN_SMITH'
+    >>> customer.first_name = 'John'
+    >>> customer.last_name = 'Smith'
+    >>> customer.email = 'john.smith@gmail.com'
+    >>> customer.plan_code = 'FREE'
+    >>> customer.save()
+    
+Get a customer's subscription information:
 
-How does it work?
------------------
-pycheddar.Connection is the object used to interact with the CheddarGetter API.
-pycheddar.Connection methods typically return a list or dictionary with the data
-retrieved from the CheddarGetter API.
+    >>> subscription = Customer.get('JOHN_SMITH').subscription
+    
+Edit a customer's subscription information:
+
+    >>> subscription = Customer.get('JOHN_SMITH').subscription
+    >>> subscription.cc_number = '4111111111111111'
+    >>> subscription.cc_first_name = 'John'
+    >>> subscription.cc_last_name = 'Smith'
+    >>> subscription.cc_expiration = '01/2013'
+    >>> subscription.cc_zip = '77777'
+    >>> subscription.cc_card_code = '000'
+    >>> subscription.save()
+    
+Switch a customer to a new plan:
+
+    >>> # lots of ways to do this...here's one:
+    >>> subscription.plan = Plan.get('COMPREHENSIVE')
+    >>> subscription.save()
+    >>>
+    >>> # or...
+    >>> subscription.plan = 'COMPREHENSIVE'
+    >>> subscription.save()
+    >>>
+    >>> # or...
+    >>> customer.plan_code = 'COMPREHENSIVE'
+    >>> customer.save()
+    
+View the items included in a plan...
+
+    >>> for item in plan.items:
+    ...     print (item.code, item.quantity)
+    
+Set an item's quantity (if the item is attached to a customer):
+
+    >>> item = customer.items[0]
+    >>> item.quantity = 5
+    >>> item.save()
+    >>>
+    >>> # note, CheddarGetter doesn't let you edit item quantity on
+    >>> # plans through the API, so that will fail...
+    >>> item = plan.items[0]
+    >>> item.quantity = 5
+    >>> item.save()
+    pycheddar.exceptions.ValidationError: Items may only have their quantity altered if they are directly attached to a customer.
+    
