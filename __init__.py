@@ -27,7 +27,7 @@ class CheddarGetter:
         
     
     @classmethod
-    def set_product_code(product_code):
+    def set_product_code(cls, product_code):
         # define the product code in the class
         cls._product_code = product_code
         
