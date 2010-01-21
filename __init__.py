@@ -19,18 +19,21 @@ class CheddarGetter:
     
         
     @classmethod
-    def settings(cls, username, password, product_code):
+    def auth(cls, username, password):
         """Define the settings used to connect to CheddarGetter."""
         
         # add the credentials to the HTTP connection
         cls._http.add_credentials(username, password)
         
+    
+    @classmethod
+    def set_product_code(product_code):
         # define the product code in the class
         cls._product_code = product_code
         
         
     @classmethod
-    def request(cls, path, code = None, item_code = None, pass_product_code = True, **kwargs):
+    def request(cls, path, code = None, item_code = None, product_code = None, pass_product_code = True, **kwargs):
         """Process an arbitrary request to CheddarGetter.
         
         Ordinarily, you shouldn't have to call this method directly,
@@ -81,12 +84,16 @@ class CheddarGetter:
                                     
         # add in the product code
         if pass_product_code is True:
-            # sanity check: is the product code set?
-            if not cls._product_code:
-                raise AttributeError, 'You must set a CheddarGetter product code. Use CheddarGetter.settings(username, password, product_code).'
+            # if the product code is None, use the one assigned to the class generically
+            if product_code is None:
+                product_code = cls._product_code
             
-            url += '/productCode/' + cls._product_code + '/'
-
+            # sanity check: is the product code set?
+            if not product_code:
+                raise AttributeError, 'You must set a CheddarGetter product code. Use CheddarGetter.set_product_code(product_code).'
+            
+            url += '/productCode/' + product_code + '/'
+            
         # create the curl command
         request, content = cls._http.request(url, method = 'POST', body = urlencode(kwargs), headers = {
             'content-type': 'application/x-www-form-urlencoded'
@@ -127,8 +134,9 @@ class CheddarObject(object):
     
     
     def __init__(self, parent = None, **kwargs):
-        """Instantiate the plan object."""
+        """Instantiate the object."""
         
+        self._product_code = CheddarGetter._product_code
         self._data = {}
         self._clean_data = {}
         self._id = None
@@ -363,7 +371,7 @@ class Plan(CheddarObject):
         # retrieve the plans from CheddarGetter
         try: 
             plans = []
-            xml = CheddarGetter.request('/plans/get/')
+            xml = CheddarGetter.request('/plans/get/', product_code = self._product_code)
         
             # make a list of Plan objects and return it
             for plan_xml in xml.iterchildren(tag = 'plan'):
@@ -380,7 +388,7 @@ class Plan(CheddarObject):
         """Get a single pricing plan"""
         
         # retrieve the plan from CheddarGetter
-        xml = CheddarGetter.request('/plans/get/', code = code)
+        xml = CheddarGetter.request('/plans/get/', code = code, product_code = self._product_code)
         
         # return a plan object
         for plan_xml in xml.iterchildren(tag = 'plan'):
@@ -400,7 +408,7 @@ class Plan(CheddarObject):
         # send the deletion request to CheddarGetter
         # note: CheddarGetter returns no response -- this is expected here
         try:
-            CheddarGetter.request('/plans/delete/', code = self._code)
+            CheddarGetter.request('/plans/delete/', code = self._code, product_code = self._product_code)
         except UnexpectedResponse:
             pass
             
@@ -455,7 +463,7 @@ class Customer(CheddarObject):
         # retreive the set of customers
         try:
             customers = []
-            xml = CheddarGetter.request('/customers/get/', **kwargs)
+            xml = CheddarGetter.request('/customers/get/', product_code = self._product_code, **kwargs)
             for customer_xml in xml.iterchildren('customer'):
                 customers.append(Customer.from_xml(customer_xml))
                 
@@ -472,7 +480,7 @@ class Customer(CheddarObject):
         Raises NotFound if the customer code does not exist
         in CheddarGetter."""
 
-        xml = CheddarGetter.request('/customers/get/', code = code)
+        xml = CheddarGetter.request('/customers/get/', product_code = self._product_code, code = code)
         for customer_xml in xml.iterchildren('customer'):
             return Customer.from_xml(customer_xml)
     
@@ -521,10 +529,10 @@ class Customer(CheddarObject):
                 if key in self.subscription:
                     kwargs['subscription[%s]' % key] = getattr(self.subscription, key)
             
-            xml = CheddarGetter.request('/customers/new/', code = self._code, **kwargs)
+            xml = CheddarGetter.request('/customers/new/', product_code = self._product_code, code = self._code, **kwargs)
         else:
             # okay, this isn't new -- send the update request
-            xml = CheddarGetter.request('/customers/edit/', code = self._code, **kwargs)
+            xml = CheddarGetter.request('/customers/edit/', product_code = self._product_code, code = self._code, **kwargs)
 
         # either way, I should get a well-formed customer XML response
         # that can now be loaded into this object
@@ -540,7 +548,7 @@ class Customer(CheddarObject):
         
         # CheddarGetter does not return a response to deletion
         # requests in the success case
-        xml = CheddarGetter.request('/customers/delete/', code = self._code)
+        xml = CheddarGetter.request('/customers/delete/', product_code = self._product_code, code = self._code)
         
     
     def get_item(item_code):
@@ -566,7 +574,7 @@ class Customer(CheddarObject):
             kwargs['description'] = description
         
         # send the request to CheddarGetter
-        xml = CheddarGetter.request('/customers/add-charge/', code = self.code, **kwargs)
+        xml = CheddarGetter.request('/customers/add-charge/', product_code = self._product_code, code = self.code, **kwargs)
         
     
 class Subscription(CheddarObject):
@@ -657,7 +665,7 @@ class Subscription(CheddarObject):
             
         # this is an object being edited; update the subscription
         # by itself at CheddarGetter
-        xml = CheddarGetter.request('/customers/edit-subscription/', code = self.customer.code, **kwargs)
+        xml = CheddarGetter.request('/customers/edit-subscription/', product_code = self._product_code, code = self.customer.code, **kwargs)
 
         # either way, I should get a well-formed customer XML response
         # that can now be loaded into this object
@@ -672,7 +680,7 @@ class Subscription(CheddarObject):
         """Remove this subscription from CheddarGetter."""
         
         # this is straightforward: just run the cancellation
-        xml = CheddarGetter.request('/customers/cancel/', code = self.customer.code, **kwargs)
+        xml = CheddarGetter.request('/customers/cancel/', product_code = self._product_code, code = self.customer.code, **kwargs)
         
         
     def cancel(self):
@@ -738,7 +746,7 @@ class Item(CheddarObject):
         self.validate()
     
         # okay, save to CheddarGetter
-        xml = CheddarGetter.request('/customers/set-item-quantity/', item_code = self.code, code = self.customer.code)
+        xml = CheddarGetter.request('/customers/set-item-quantity/', product_code = self._product_code, item_code = self.code, code = self.customer.code)
         self._load_data_from_xml(xml)
         return self
 
@@ -755,7 +763,9 @@ class Charge(CheddarObject):
 try:
     from django.conf import settings
     
-    if settings.CHEDDARGETTER_USERNAME and settings.CHEDDARGETTER_PASSWORD and settings.CHEDDARGETTER_PRODUCT_CODE:
-        CheddarGetter.settings(settings.CHEDDARGETTER_USERNAME, settings.CHEDDARGETTER_PASSWORD, settings.CHEDDARGETTER_PRODUCT_CODE)
+    if settings.CHEDDARGETTER_USERNAME and settings.CHEDDARGETTER_PASSWORD:
+        CheddarGetter.auth(settings.CHEDDARGETTER_USERNAME, settings.CHEDDARGETTER_PASSWORD)
+    if settings.CHEDDARGETTER_PRODUCT_CODE:
+        CheddarGetter.set_product_code(settings.CHEDDARGETTER_PRODUCT_CODE)
 except ImportError:
     pass
