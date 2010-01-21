@@ -371,7 +371,7 @@ class Plan(CheddarObject):
         # retrieve the plans from CheddarGetter
         try: 
             plans = []
-            xml = CheddarGetter.request('/plans/get/', product_code = self._product_code)
+            xml = CheddarGetter.request('/plans/get/')
         
             # make a list of Plan objects and return it
             for plan_xml in xml.iterchildren(tag = 'plan'):
@@ -388,7 +388,7 @@ class Plan(CheddarObject):
         """Get a single pricing plan"""
         
         # retrieve the plan from CheddarGetter
-        xml = CheddarGetter.request('/plans/get/', code = code, product_code = self._product_code)
+        xml = CheddarGetter.request('/plans/get/', code = code)
         
         # return a plan object
         for plan_xml in xml.iterchildren(tag = 'plan'):
@@ -463,7 +463,7 @@ class Customer(CheddarObject):
         # retreive the set of customers
         try:
             customers = []
-            xml = CheddarGetter.request('/customers/get/', product_code = self._product_code, **kwargs)
+            xml = CheddarGetter.request('/customers/get/', **kwargs)
             for customer_xml in xml.iterchildren('customer'):
                 customers.append(Customer.from_xml(customer_xml))
                 
@@ -480,7 +480,7 @@ class Customer(CheddarObject):
         Raises NotFound if the customer code does not exist
         in CheddarGetter."""
 
-        xml = CheddarGetter.request('/customers/get/', product_code = self._product_code, code = code)
+        xml = CheddarGetter.request('/customers/get/', code = code)
         for customer_xml in xml.iterchildren('customer'):
             return Customer.from_xml(customer_xml)
     
