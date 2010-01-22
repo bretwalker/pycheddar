@@ -763,9 +763,9 @@ class Charge(CheddarObject):
 try:
     from django.conf import settings
     
-    if settings.CHEDDARGETTER_USERNAME and settings.CHEDDARGETTER_PASSWORD:
+    if hasattr(settings, 'CHEDDARGETTER_USERNAME') and hasattr(settings, 'CHEDDARGETTER_PASSWORD'):
         CheddarGetter.auth(settings.CHEDDARGETTER_USERNAME, settings.CHEDDARGETTER_PASSWORD)
-    if settings.CHEDDARGETTER_PRODUCT_CODE:
+    if hasattr(settings, 'CHEDDARGETTER_PRODUCT_CODE'):
         CheddarGetter.set_product_code(settings.CHEDDARGETTER_PRODUCT_CODE)
 except ImportError:
     pass
