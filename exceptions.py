@@ -1,23 +1,26 @@
-class NotFound(Exception):
+class MouseTrap(Exception):
+    pass
+
+class NotFound(MouseTrap):
     pass
     
-class AuthorizationRequired(Exception):
+class AuthorizationRequired(MouseTrap):
     pass
     
-class Forbidden(Exception):
+class Forbidden(MouseTrap):
     pass
     
-class UnexpectedResponse(Exception):
+class UnexpectedResponse(MouseTrap):
     pass
     
-class BadRequest(Exception):
+class BadRequest(MouseTrap):
     pass
         
-class GatewayFailure(Exception):
+class GatewayFailure(MouseTrap):
     pass
     
-class GatewayConnectionError(Exception):
+class GatewayConnectionError(MouseTrap):
     pass
     
-class ValidationError(Exception):
+class ValidationError(MouseTrap):
     pass
