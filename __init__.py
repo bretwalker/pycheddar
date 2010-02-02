@@ -308,6 +308,9 @@ class CheddarObject(object):
                         klass = getattr(sys.modules[__name__], single_xml.tag.capitalize())
                         setattr(self, single_xml.tag, klass.from_xml(single_xml, parent = self))
                         
+                        # denote a clean version as well
+                        setattr(self, '_clean_%s' % single_xml.tag, getattr(self, single_xml.tag))
+                        
                     continue
                     
                 # okay, it's not a single relationship -- follow my normal
@@ -323,6 +326,9 @@ class CheddarObject(object):
                         getattr(self, child.tag).append(klass.from_xml(indiv_xml, parent = self))
                     except AttributeError:
                         break
+                        
+                    # set the clean version
+                    setattr(self, '_clean_' + child.tag, getattr(self, child.tag))
                         
                 # done; move to the next child
                 continue
@@ -358,6 +364,15 @@ class CheddarObject(object):
                 kwargs[item[0]] = item[1]
                 
         return kwargs
+        
+        
+    def _is_clean(self):
+        """Return True if this object has not been modified, False otherwise."""
+        
+        if len(self._build_kwargs()) == 0:
+            return True
+            
+        return False
                 
 
 class Plan(CheddarObject):
@@ -533,6 +548,11 @@ class Customer(CheddarObject):
         else:
             # okay, this isn't new -- send the update request
             xml = CheddarGetter.request('/customers/edit/', product_code = self._product_code, code = self._code, **kwargs)
+            
+            # if the subscription has been altered, save it too
+            # (this seems like expected behavior)
+            if not self.subscription._is_clean():
+                self.subscription.save()
 
         # either way, I should get a well-formed customer XML response
         # that can now be loaded into this object
@@ -581,7 +601,7 @@ class Subscription(CheddarObject):
     """An object representing a CheddarGetter subscription."""
     
     def __init__(self, **kwargs):
-        self.plan = Plan()
+        self._clean_plan = self.plan = Plan()
         super(Subscription, self).__init__(**kwargs)
         
     
@@ -649,6 +669,19 @@ class Subscription(CheddarObject):
         return True
         
         
+    def _build_kwargs(self):
+        """Build keyword arguments. Make sure plan code is included if appropriate."""
+        
+        # run the superclass method
+        kwargs = super(Subscription, self)._build_kwargs()
+        
+        # make sure plan code is reflected accurately
+        if self.plan != self._clean_plan:
+            kwargs['plan_code'] = self.plan.code
+            
+        return kwargs
+        
+        
     def save(self):
         """Save this object's properties to CheddarGetter."""
         
@@ -670,7 +703,7 @@ class Subscription(CheddarObject):
         # either way, I should get a well-formed customer XML response
         # that can now be loaded into this object
         for subscription_xml in xml.iterchildren('subscription'):
-            self._load_data_from_xml(customer_xml)
+            self._load_data_from_xml(subscription_xml)
             break
             
         return self
