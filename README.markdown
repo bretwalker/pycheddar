@@ -1,8 +1,15 @@
 A Python wrapper for CheddarGetter
 ----------------------------------
-PyCheddar is a Python wrapper for CheddarGetter - which is a great service
-for handling recurring subscription payments without having to reinvent a
-mini-app to handle payments with each new project.
+More just just a Python wrapper for CheddarGetter, pycheddar gives you class
+objects that work a lot like Django models, making the whole experience of
+integrating with CheddarGetter just a little more awesome and Pythonic.
+
+CheddarGetter abstracts the entire process of managing credit cards,
+processing transactions on a recurring basis, and even more complex setups
+like free trials, setup fees, and overage charges. Writing that from scratch
+would take forever. We'd end up spending months writing code that doesn't do
+anything to help businesses harness social media - all it does it help us get
+their money.
 
 
 Installation
@@ -11,10 +18,13 @@ Just clone this repository anywhere in your PythonPath like this:
 
     $ git clone http://github.com/jasford/pycheddar.git
 
-Eventually - but not just yet - you will be able to use easy_install
-like this:
+or get the most recent stable version from PyPi like this:
 
     $ easy_install pycheddar
+
+Note that you'll also need to get httplib2 if you don't already have it. The
+easy_install version from PyPi loads it automatically as a dependency, but if
+you just clone the git repository you'll need to get it yourself.
 
 Once you've done one of the above, you can test to see if it is installed from
 the Python interactive terminal:
@@ -30,8 +40,8 @@ PyCheddar was created as part of the code base for FeedMagnet - an online app
 that helps businesses harness with social media. We use CheddarGetter to handle
 all of our payment processing for premium accounts.
 
-We really believe in open source software - and we've benefited a lot from it.
-We use Ubuntu, Python, Django, MySQL, CouchDB - and a ton of other open source
+We really believe in open source software - and we've benefited a ton from it.
+We use Ubuntu, Python, Django, MySQL - and a bunch of other open source
 tools to make FeedMagnet run. Open source only works if we all give back. This
 is hopefully just our first minor contribution to the open source community.
 
