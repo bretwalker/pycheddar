@@ -8,7 +8,7 @@ from utils import *
 from lxml import etree
 from urllib import urlencode
 
-VERSION = '1.0alpha'
+VERSION = '0.9.2'
 
 class CheddarGetter:
     """Class designed to handle all interaction with the CheddarGetter API."""
