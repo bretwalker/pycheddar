@@ -57,7 +57,7 @@ class CheddarGetter:
             code = str(code)
             
             # it may be an ID instead; detect this
-            if re.match(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', code):
+            if re.match(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', code):
                 if add_to_url is True:
                     url += '/id/' + code
                 else:
