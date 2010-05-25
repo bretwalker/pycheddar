@@ -8,7 +8,7 @@ from utils import *
 from lxml import etree
 from urllib import urlencode
 
-VERSION = '0.9.2'
+VERSION = '0.9.3'
 
 class CheddarGetter:
     """Class designed to handle all interaction with the CheddarGetter API."""
@@ -168,6 +168,7 @@ class CheddarObject(object):
             else:
                 raise AttributeError, 'Once an item has been saved to CheddarGetter, the code is immutable.'
         elif key == 'id':
+            # id can only be modified if it is not set
             raise AttributeError, 'The CheddarGetter ID is immutable.'
         elif isinstance(value, CheddarObject) or isinstance(value, list):
             # if the value is a CheddarObject or a list, then it doesn't belong
@@ -245,7 +246,7 @@ class CheddarObject(object):
         
         
     @classmethod
-    def from_xml(cls, xml, *args, **kwargs):
+    def from_xml(cls, xml, **kwargs):
         """Create a new object and load information for it from
         XML sent from CheddarGetter.
         
@@ -266,7 +267,7 @@ class CheddarObject(object):
             raise KeyError, 'Unrecognized keyword argument: %s' % kwargs.keys()[0]
         
         # create the new object and load in the data
-        new = cls(*args, parent = parent)
+        new = cls(parent = parent, **kwargs)
         new._load_data_from_xml(xml, clean)
         
         # done -- return the new object
