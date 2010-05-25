@@ -5,7 +5,7 @@ import re
 import sys
 from exceptions import *
 from utils import *
-from lxml import etree
+from xml.etree import ElementTree
 from urllib import urlencode
 
 VERSION = '0.9.3'
@@ -101,7 +101,7 @@ class CheddarGetter:
         
         # parse the XML
         try:
-            content = etree.fromstring(content)
+            content = ElementTree.fromstring(content)
         except:
             raise UnexpectedResponse, "The server sent back something that wasn't valid XML."
         
@@ -295,7 +295,7 @@ class CheddarObject(object):
             ('subscription', 'plans'),
         )
         
-        for child in xml.iterchildren():
+        for child in xml.getchildren():
             # is this an element with children? if so, it's an object
             # relationship, not just an attribute
             if len(child.getchildren()) > 0:
@@ -317,7 +317,7 @@ class CheddarObject(object):
                 # okay, it's not a single relationship -- follow my normal
                 # process for a many to many
                 setattr(self, child.tag, [])
-                for indiv_xml in child.iterchildren():
+                for indiv_xml in child.getchildren():
                     # get the class that this item is
                     try:
                         klass = getattr(sys.modules[__name__], indiv_xml.tag.capitalize())
@@ -390,7 +390,7 @@ class Plan(CheddarObject):
             xml = CheddarGetter.request('/plans/get/')
         
             # make a list of Plan objects and return it
-            for plan_xml in xml.iterchildren(tag = 'plan'):
+            for plan_xml in xml.getiterator(tag = 'plan'):
                 plans.append(Plan.from_xml(plan_xml))
                 
             return plans
@@ -407,7 +407,7 @@ class Plan(CheddarObject):
         xml = CheddarGetter.request('/plans/get/', code = code)
         
         # return a plan object
-        for plan_xml in xml.iterchildren(tag = 'plan'):
+        for plan_xml in xml.getiterator(tag = 'plan'):
             return Plan.from_xml(plan_xml)
             
             
@@ -480,7 +480,7 @@ class Customer(CheddarObject):
         try:
             customers = []
             xml = CheddarGetter.request('/customers/get/', **kwargs)
-            for customer_xml in xml.iterchildren('customer'):
+            for customer_xml in xml.getiterator(tag='customer'):
                 customers.append(Customer.from_xml(customer_xml))
                 
             return customers
@@ -497,7 +497,7 @@ class Customer(CheddarObject):
         in CheddarGetter."""
 
         xml = CheddarGetter.request('/customers/get/', code = code)
-        for customer_xml in xml.iterchildren('customer'):
+        for customer_xml in xml.getiterator(tag='customer'):
             return Customer.from_xml(customer_xml)
     
     
@@ -557,7 +557,7 @@ class Customer(CheddarObject):
 
         # either way, I should get a well-formed customer XML response
         # that can now be loaded into this object
-        for customer_xml in xml.iterchildren('customer'):
+        for customer_xml in xml.getiterator(tag='customer'):
             self._load_data_from_xml(customer_xml)
             break
             
@@ -703,7 +703,7 @@ class Subscription(CheddarObject):
 
         # either way, I should get a well-formed customer XML response
         # that can now be loaded into this object
-        for subscription_xml in xml.iterchildren('subscription'):
+        for subscription_xml in xml.getiterator(tag='subscription'):
             self._load_data_from_xml(subscription_xml)
             break
             
