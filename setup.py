@@ -12,7 +12,6 @@ setup(
     version = '1.0',
     description = 'Pythonic Python wrapper for CheddarGetter.',
     license = 'BSD',
-    long_description = read('README.rst'),
     url = 'https://github.com/bretwalker/pycheddar',
     
     py_modules =  ['pycheddar'],
