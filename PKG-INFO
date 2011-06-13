@@ -1,0 +1,28 @@
+Metadata-Version: 1.1
+Name: pycheddar
+Version: 0.9.3
+Summary: Class objects to abstract the process of interacting with the CheddarGetter API
+Home-page: http://github.com/jasford/pycheddar
+Author: FeedMagnet
+Author-email: contact@feedmagnet.com
+License: UNKNOWN
+Description: A Python wrapper for CheddarGetter
+        ----------------------------------
+        
+        More just just a Python wrapper for CheddarGetter, pycheddar gives you class
+        objects that work a lot like Django models, making the whole experience of
+        integrating with CheddarGetter just a little more awesome and Pythonic.
+        
+        
+Keywords: cheddargettar,payment,processing
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Framework :: Django
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires: httplib2(>=0.5.0)
