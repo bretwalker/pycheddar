@@ -714,7 +714,7 @@ class Subscription(CheddarObject):
         """Remove this subscription from CheddarGetter."""
         
         # this is straightforward: just run the cancellation
-        xml = CheddarGetter.request('/customers/cancel/', product_code = self._product_code, code = self.customer.code, **kwargs)
+        xml = CheddarGetter.request('/customers/cancel/', product_code = self._product_code, code = self.customer.code)
         
         
     def cancel(self):
