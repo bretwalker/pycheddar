@@ -4,9 +4,6 @@ try:
 except ImportError:
     from distutils.core import setup
 
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
-
 setup(
     name = 'pycheddar',
     version = '1.0',
@@ -14,7 +11,7 @@ setup(
     license = 'BSD',
     url = 'https://github.com/bretwalker/pycheddar',
     
-    py_modules =  ['pycheddar'],
+    py_modules =  ['__init__'],
     
     classifiers = (
         'Development Status :: 4 - Beta',
