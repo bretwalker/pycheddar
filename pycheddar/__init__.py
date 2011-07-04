@@ -672,7 +672,13 @@ class Subscription(CheddarObject):
         
     def _build_kwargs(self):
         """Build keyword arguments. Make sure plan code is included if appropriate."""
-        
+
+        # if the customer doesn't have an active subscription, these values are required, whether they're clean or not
+        required_if_canceled = ['cc_first_name', 'cc_last_name', 'cc_zip']
+        if self.canceled_datetime:
+            for key in required_if_canceled:
+                del self._clean_data[key]
+
         # run the superclass method
         kwargs = super(Subscription, self)._build_kwargs()
         
